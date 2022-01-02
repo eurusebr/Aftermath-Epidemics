@@ -21,20 +21,20 @@
 #include <iterator>
 
 
-#define Lx 20
-#define Ly 20
+#define Lx 50
+#define Ly 50
 #define N Lx*Ly //total nodes
-#define steps 10*N //steps of the LRW
-#define iteration 50 //total iterations
+#define steps 3*N //steps of the LRW
+#define iteration 1 //total iterations
 #define M_PI 3.14159265358979323846
-#define Nsplit 10
+#define Nsplit 1
 #define Levy_Alpha 0.1
 
 
 using namespace std;
 
 
-vector<vector<double>> levy(int size, double C);
+vector<vector<double>> levy(int size, double C, mt19937& gen, mt19937& genn, uniform_real_distribution<>& distr);
 vector<vector<int>> split (const std::vector<int>& v); 
 vector<int> Divisors(int n);
 vector<int> path_maker(vector<vector<double>>& total);
@@ -44,36 +44,34 @@ vector<vector<double>> find_clusters(int ii, int const& num_iter, vector<int> in
 int main(void)
 {
 	srand(time(0));
-	random_device rd;
-	mt19937 gen(rd()); //Mersenne Twister RNG
-	int ff = rand();
-
-	ofstream output;//outputt;//outputt;
-	output.open("test" + to_string(Lx) + "-" + to_string(ff) + ".txt");
-//	outputt.open("delta" + to_string(L) + "-" + to_string(ff) + ".txt");
-//	ofstream niegh;
-//	niegh.open("niegh" + to_string(L) + ".txt");
-
-
+	// random_device rd;
+	// mt19937 gen(rd()); //Mersenne Twister RNG
+	// int ff = rand();
 	
 	for (int k = 0; k < iteration; k++)
 	{
 		vector<vector<double>> total;
 		vector<int> indexes, divisions;
 		vector<float> final_total_landmass, final_big_cluster;
+		uniform_real_distribution<> distr(0, 1);
+		// normal_distribution<> d{0, (1/pow(2*C, 0.5))}; //the first entery is mean and the second is the std
+		random_device rd, rand;
+		mt19937 gen(rd()), genn(rand()); //Mersenne Twister RNG
 
 		double C = Levy_Alpha;
-		total = levy(steps, C);
+		total = levy(steps, C, gen, genn, distr);
 		indexes = path_maker(total);
 		divisions = Divisors(indexes.size());
-		int num_iter = divisions[ceil(divisions.size()/2)];
-		int num_proc = int(steps/num_iter);
+		// int num_iter = divisions[ceil(divisions.size()/2)];
+		// int num_proc = int(steps/num_iter);
+		int num_iter = steps;
+		int num_proc = 1;
 
 		printf("num_proc = %d \n", num_proc);
 		printf("num_iter = %d \n", num_iter);
 
 		auto PBS_index = split(indexes);
-    	int PBS_counter = two;
+    	int PBS_counter = 0; //two;
     	int PBS_Pos = PBS_counter*PBS_index[0].size();
 
 
@@ -90,10 +88,10 @@ int main(void)
 		}
 		
 		//saving the data in npy format
-		string path1 = "/home/complex/c++/Rewrite_c++/HKPBC/CMB_test_data/"; //"/share/users/m_movahed/cmb_cluster/s22_c++/"
-		string path = "/home/complex/c++/Rewrite_c++/HKPBC/CMB_test_data/"; //"/share/users/m_movahed/cmb_cluster/s22_c++/"
-		string filename = "total_landmass_" + to_string(one)+ "_" + to_string(PBS_counter) + ".txt";
-		string filename1 = "big_cluster_" + to_string(one) + "_" + to_string(PBS_counter) + ".txt";
+		string path1 = "/home/complex/Levy flight/Result/"; //"/share/users/m_movahed/cmb_cluster/s22_c++/"
+		string path = "/home/complex/Levy flight/Result/"; //"/share/users/m_movahed/cmb_cluster/s22_c++/"
+		string filename = "total_landmass_" + to_string(Lx)+ "_" + to_string(PBS_counter) + ".txt";
+		string filename1 = "big_cluster_" + to_string(Lx) + "_" + to_string(PBS_counter) + ".txt";
 		std::ofstream fout(path + filename);
 		fout.precision(17);
 		std::copy(final_total_landmass.begin(), final_total_landmass.end(),std::ostream_iterator<double>(fout, "\n"));
@@ -107,14 +105,9 @@ int main(void)
 }
 
 
-vector<vector<double>> levy(int size, double C)
+vector<vector<double>> levy(int size, double C, mt19937& gen, mt19937& genn, uniform_real_distribution<>& distr)
 {
 	vector<vector<double>> final;
-	uniform_int_distribution<> distr(0, 1);
-	// normal_distribution<> d{0, (1/pow(2*C, 0.5))}; //the first entery is mean and the second is the std
-	random_device rd, rand;
-	mt19937 gen(rd()); //Mersenne Twister RNG
-	mt19937 genn(rand()); //Mersenne Twister RNG
 
 
 	for ( int i = 0; i < steps; i++)
@@ -122,18 +115,20 @@ vector<vector<double>> levy(int size, double C)
 		vector<double> result;
 		double angle = 2 * M_PI * distr(gen);
 		result.push_back(angle);
-		cout<<"angle: "<<angle<<endl;
-		double r = (1/pow(distr(genn), -1/C));
+		// cout<<"angle: "<<angle<<endl;
+		double r = (1/pow(distr(genn), -1/C)) * Lx;
 
-		while (r > Lx | r == 0)
+		while (r > Lx || r < 1)
 		{
-			r = (1/pow(distr(genn), -1/C));
+			r = (1/pow(distr(genn), -1/C)) * Lx;
 		}
-		cout<<"r: "<<r<<endl;
+		// cout<<"r: "<<r<<endl;
 		result.push_back(r);
 		double x = r * cos(angle);
+		// cout<<"x: "<<x<<endl;
 		result.push_back(x);
 		double y = r * sin(angle);
+		// cout<<"y: "<<y<<endl;
 		result.push_back(y);
 		final.push_back(result);
 	}
@@ -178,15 +173,31 @@ vector<int> path_maker(vector<vector<double>>& total )
 	vector<int> matrix;
 	random_device rd;
 	mt19937 gen(rd()); //Mersenne Twister RNG
-	uniform_int_distribution<int> ran_pos(0, N-1);
+	uniform_int_distribution<int> ran_pos(0, Lx-1);
 	int x = ran_pos(gen);
 	int y = ran_pos(gen);
 	matrix.push_back((Ly*x + y));
 	for (int i = 0; i < total.size(); i++)
 	{
-		x = x + total[i][2] == Lx ? 0 : x + total[i][2];
-		y = y + total[i][3] == Ly ? 0 : y + total[i][3];
-		matrix.push_back((Ly*x + y));	
+		x = x + int(total[i][2]);// == Lx ? 0 : int(x + total[i][2]);
+		if (x < 0)
+		{
+			x = (x % Lx + Lx) % Lx;
+		}
+		if (x > Lx-1)
+		{
+			x = x - Lx;
+		}
+		y = y + int(total[i][3]);// == Ly ? 0 :int(y + total[i][3]);
+		if (y < 0)
+		{
+			y = (y % Ly + Ly) % Ly;
+		}
+		if (y > Ly-1)
+		{
+			y = y - Ly;
+		}
+		matrix.push_back((Ly*x + y));
 	}
 	return matrix;
 }
@@ -202,19 +213,22 @@ vector<vector<double>> find_clusters(int ii, int const& num_iter, vector<int> in
     HKPBC object(Lx,Ly,N); //introducing the hk class
 
 
-    for (int ii=l; ii< l + num_iter; ii++)
+    for (int ii=l; ii < l + num_iter; ii++) //
     {
         //making the array of labeling
         vector<int> myBoolArray(N);
+		// cout<<"indexes: ";
         for (int m=0; m< (ii+1)+PBS_Pos; m++)
         {
+			// cout<<indexes[m]<<",";
             myBoolArray[indexes[m]] = 1;
         }
+		// cout<<endl;
         //labeling the array and returning the cluster labels
         s = object.HK(myBoolArray);
 
-        pp = ((ii+1)+PBS_Pos) / double(N); //normal fraction of land
-        big_cluster.push_back(1.0*s); // biggest cluster
+        pp = ((ii+1)+PBS_Pos) /double(steps); //normal fraction of land
+        big_cluster.push_back(1.0*s/double(N)); // biggest cluster
         total_landmass.push_back(pp);
     }
 
