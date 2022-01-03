@@ -88,8 +88,8 @@ int main(void)
 		}
 		
 		//saving the data in npy format
-		string path1 = "/home/complex/Levy flight/Result/"; //"/share/users/m_movahed/cmb_cluster/s22_c++/"
-		string path = "/home/complex/Levy flight/Result/"; //"/share/users/m_movahed/cmb_cluster/s22_c++/"
+		string path1 = "/home/mah/Data_c++/Levy flight/Result/"; //"/share/users/m_movahed/cmb_cluster/s22_c++/"
+		string path = "/home/mah/Data_c++/Levy flight/Result/"; //"/share/users/m_movahed/cmb_cluster/s22_c++/"
 		string filename = "total_landmass_" + to_string(Lx)+ "_" + to_string(PBS_counter) + ".txt";
 		string filename1 = "big_cluster_" + to_string(Lx) + "_" + to_string(PBS_counter) + ".txt";
 		std::ofstream fout(path + filename);
@@ -116,11 +116,11 @@ vector<vector<double>> levy(int size, double C, mt19937& gen, mt19937& genn, uni
 		double angle = 2 * M_PI * distr(gen);
 		result.push_back(angle);
 		// cout<<"angle: "<<angle<<endl;
-		double r = (1/pow(distr(genn), -1/C)) * Lx;
+		double r = (pow(distr(genn), -1/C));
 
 		while (r > Lx || r < 1)
 		{
-			r = (1/pow(distr(genn), -1/C)) * Lx;
+			r = (pow(distr(genn), -1/C));
 		}
 		// cout<<"r: "<<r<<endl;
 		result.push_back(r);
