@@ -75,8 +75,8 @@ int main(void)
 		int num_iter = steps;
 		int num_proc = 1;
 
-		printf("num_proc = %d \n", num_proc);
-		printf("num_iter = %d \n", num_iter);
+		// printf("num_proc = %d \n", num_proc);
+		// printf("num_iter = %d \n", num_iter);
 
 		auto PBS_index = split(indexes);
     	int PBS_counter = 0; //two;
@@ -143,23 +143,15 @@ vector<int> levy(int size, double C, mt19937& gen, mt19937& genn, uniform_real_d
 		// result.push_back(angle);
 		// cout<<"angle: "<<angle<<endl;
 		double r = (pow(distr(genn), -1/C));
-		while (r > Lx || r < 1)
-		{
-			r = (pow(distr(genn), -1/C));
-		}
 
 		double dx = int(r * cos(angle));
 		double dy = int(r * sin(angle));
 
-		while (dx == 0 && dy == 0)
+		while (r > Lx-1 || r < 1 || (dx == 0 && dy == 0) || (dx == Lx && dy == 0) || (dx == 0 && dy == Ly) || (dx == Lx && dy == Ly))
 		{
-			double r = (pow(distr(genn), -1/C));
-			while (r > Lx || r < 1)
-			{
-				r = (pow(distr(genn), -1/C));
-			}
-			double dx = int(r * cos(angle));
-			double dy = int(r * sin(angle));
+			r = (pow(distr(genn), -1/C));
+			dx = int(r * cos(angle));
+			dy = int(r * sin(angle));
 		}
 
 		x = x + dx;// == Lx ? 0 : int(x + total[i][2]);
@@ -182,10 +174,6 @@ vector<int> levy(int size, double C, mt19937& gen, mt19937& genn, uniform_real_d
 		}
 
 		matrix.push_back((Ly*x + y));
-		// result.push_back(r);
-		// result.push_back(dx);
-		// result.push_back(dy);
-		// final.push_back(result);
 	}
 
 	return matrix;
