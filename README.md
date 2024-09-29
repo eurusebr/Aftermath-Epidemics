@@ -5,5 +5,5 @@ In this work, we explore the clustering of an infection on a 2D and 3D array. We
 We use the Newmann-ziff algorithm for the simulations.
 We see that the 3D knight move belongs to the Pacman percolation class. In the 2D examination, the universality class is not exact because of the new length scales in the system.
 <p float="left">
-<img src="[https://github.com/eurusebr/Aftermath-Epidemics/blob/main/moves.png]" alt="alt text" width="400">
+<img src="https://github.com/eurusebr/Aftermath-Epidemics/blob/main/moves.png" alt="alt text" width="400">
 </p>
